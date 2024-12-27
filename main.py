@@ -1,14 +1,16 @@
 import os
 import time
 from openai import OpenAI
+from dotenv import load_dotenv
 
-# Initialize OpenAI client
-os.environ["OPENAI_API_KEY"] = "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"
-OpenAI.api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI()
+# Load environment variables from .env file
+load_dotenv()
 
-# Assistant configuration
-assistant_id = "asst_QGIJoangFXerAei9NAVTitCA"
+# Initialize OpenAI client with API key from .env
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+# Assistant configuration from .env
+assistant_id = os.getenv('ASSISTANT_ID')
 
 def create_thread(prompt):
     thread = client.beta.threads.create()
@@ -83,7 +85,7 @@ def process_image(image_path):
 if __name__ == "__main__":
     print("Starting image processing...")
     # Replace with your image path
-    image_path = "images/IMG_20240523_152537.jpg"
+    image_path = "images/IMG_20240520_155857.jpg"
     result = process_image(image_path)
     if result:        
         print("\nImage Classification:")
