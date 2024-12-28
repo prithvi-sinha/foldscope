@@ -1,16 +1,24 @@
 import os
 import time
+from fastapi import FastAPI, UploadFile, HTTPException
 from openai import OpenAI
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize OpenAI client with API key from .env
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+api_key = os.getenv("OPENAI_API_KEY")
+assistant_id = os.getenv("ASSISTANT_ID")
 
-# Assistant configuration from .env
-assistant_id = os.getenv('ASSISTANT_ID')
+if not api_key or not assistant_id:
+    raise ValueError("OPENAI_API_KEY or ASSISTANT_ID not set in .env file")
+
+client = OpenAI(api_key=api_key)
+
+# Initialize FastAPI app
+app = FastAPI(title="Image Classification API", version="1.0")
 
 def create_thread(prompt):
     thread = client.beta.threads.create()
@@ -25,25 +33,32 @@ def create_thread(prompt):
     run = client.beta.threads.runs.create(
         thread_id=my_thread_id,
         assistant_id=assistant_id,
-    ) 
+    )
 
     return run.id, thread.id
 
 def check_status(run_id, thread_id):
-    run = client.beta.threads.runs.retrieve(
-        thread_id=thread_id,
-        run_id=run_id,
-    )
+    run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
     return run.status
 
-def process_image(image_path):
+@app.post("/classify-image/")
+async def classify_image(image: UploadFile):
+    """
+    Endpoint to classify an uploaded image using OpenAI API.
+    """
     try:
-        print("Processing image...")
-        file = client.files.create(
-                file=open(image_path, "rb"),
-                purpose="vision"
-                )
+        # Save uploaded file temporarily
+        image_path = f"/tmp/{image.filename}"
+        with open(image_path, "wb") as f:
+            f.write(await image.read())
         
+        # Upload the file to OpenAI
+        file = client.files.create(
+            file=open(image_path, "rb"),
+            purpose="vision"
+        )
+
+        # Create content for classification
         content = [
             {
                 "type": "text",
@@ -58,37 +73,25 @@ def process_image(image_path):
             }
         ]
 
-        # Create a new thread
+        # Create a thread for processing
         my_run_id, my_thread_id = create_thread(content)
 
-        # Check the run status
-        status = check_status(my_run_id, my_thread_id)
-        while (status != "completed"):
+        # Poll the status until completion
+        while True:
             status = check_status(my_run_id, my_thread_id)
+            if status == "completed":
+                break
+            elif status == "failed":
+                raise HTTPException(status_code=500, detail="Image processing failed.")
             time.sleep(2)
 
-        # Get the response
-        response = client.beta.threads.messages.list(
-            thread_id=my_thread_id
-        )
-
+        # Retrieve the classification result
+        response = client.beta.threads.messages.list(thread_id=my_thread_id)
         if response.data:
-            content = response.data[0].content[0].text.value
-            return content
+            classification = response.data[0].content[0].text.value
+            return JSONResponse({"classification": classification})
         else:
-            raise Exception("No response received from assistant")
-
+            raise HTTPException(status_code=500, detail="No response received from assistant.")
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return None
+        raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
-    print("Starting image processing...")
-    # Replace with your image path
-    image_path = "images/IMG_20240520_155857.jpg"
-    result = process_image(image_path)
-    if result:        
-        print("\nImage Classification:")
-        print(result)
-    else:
-        print("Failed to process image")
