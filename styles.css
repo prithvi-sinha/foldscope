@@ -54,10 +54,12 @@ button:hover {
     flex-grow: 1; /* Take up available space */
 }
 
+/* Footer */
 footer {
     display: flex;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* Align items at the top */
     background-color: #333;
     color: white;
     padding: 10px 20px;
@@ -69,7 +71,9 @@ footer {
 }
 
 footer div {
-    width: 50%; /* Divide the footer into two equal parts */
+    width: 48%; /* Divide the footer into two almost equal parts */
+    margin-bottom: 10px;
+    min-height: 50px; /* Ensure the div doesn't collapse */
 }
 
 #classification-result h3,
@@ -89,4 +93,38 @@ footer div {
     list-style-type: none;
     font-size: 14px;
     color: #ddd;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    /* Adjust footer layout for smaller screens */
+    footer {
+        flex-direction: column; /* Stack footer items vertically */
+        align-items: center;
+    }
+
+    footer div {
+        width: 100%; /* Make footer items full-width */
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    #controls {
+        top: 5px;
+        padding: 5px 10px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    footer {
+        padding: 8px 10px;
+    }
+
+    footer div {
+        margin-bottom: 5px;
+    }
 }
