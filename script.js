@@ -1,8 +1,8 @@
 const API_URL = "https://foldscopeapi.onrender.com/classify-image/";
-
 const video = document.getElementById("camera-feed");
 const output = document.getElementById("output");
 const arResult = document.getElementById("ar-result");
+const devicesList = document.getElementById("devices-list");
 
 // Access the user's camera
 async function startCamera() {
@@ -62,7 +62,11 @@ async function captureImage() {
             const data = await response.json();
             console.log("API Response:", data);
             output.textContent = data.classification;
-            arResult.setAttribute("value", data.classification);
+
+            // Update AR text
+            if (arResult) {
+                arResult.setAttribute("value", data.classification);
+            }
         } catch (error) {
             console.error("Error:", error);
             output.textContent = `Error: ${error.message}`;
@@ -70,24 +74,26 @@ async function captureImage() {
     }, "image/jpeg");
 }
 
-// Debugging: List available devices
+// List detected devices
 async function listDevices() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        devicesList.innerHTML = ""; // Clear the list
         devices.forEach((device) => {
-            console.log(`${device.kind}: ${device.label} (id: ${device.deviceId})`);
+            const li = document.createElement("li");
+            li.textContent = `${device.kind}: ${device.label}`;
+            devicesList.appendChild(li);
         });
     } catch (error) {
         console.error("Error listing devices:", error);
+        devicesList.innerHTML = "<li>Error listing devices</li>";
     }
 }
 
-// Event Listeners
+// Initialize
 document.getElementById("capture-btn").addEventListener("click", captureImage);
 document.getElementById("ar-btn").addEventListener("click", () => {
     alert("Point your camera at a Hiro marker to see AR overlays!");
 });
-
-// Initialize the camera and debug utilities
 startCamera();
 listDevices();

@@ -23,12 +23,6 @@
     <!-- Live Camera Feed -->
     <video id="camera-feed" autoplay playsinline></video>
 
-    <!-- Result Section -->
-    <div id="result">
-        <h3>Classification Result</h3>
-        <p id="output">No result yet. Please capture an image.</p>
-    </div>
-
     <!-- AR Scene -->
     <a-scene embedded arjs="sourceType: webcam; facingMode: environment;">
         <a-marker preset="hiro">
@@ -36,7 +30,18 @@
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
-    
+
+    <!-- Footer -->
+    <footer>
+        <div id="classification-result">
+            <h3>Classification Result:</h3>
+            <p id="output">No result yet. Please capture an image.</p>
+        </div>
+        <div id="detected-devices">
+            <h3>Detected Devices:</h3>
+            <ul id="devices-list"></ul>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
