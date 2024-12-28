@@ -104,9 +104,9 @@
     </div>
 
     <!-- AR Scene -->
-    <a-scene embedded arjs>
+    <a-scene embedded arjs="sourceType: webcam; facingMode: environment;">
         <a-marker preset="hiro">
-            <a-text id="ar-result" value="Point camera to classify" position="0 0.5 0" align="center"></a-text>
+            <a-text value="Point your camera at the marker" position="0 0.5 0" align="center"></a-text>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
