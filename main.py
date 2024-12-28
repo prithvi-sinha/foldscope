@@ -1,6 +1,7 @@
 import os
 import time
 from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -19,6 +20,15 @@ client = OpenAI(api_key=api_key)
 
 # Initialize FastAPI app
 app = FastAPI(title="Image Classification API", version="1.0")
+
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000", "https://your-frontend-domain.com"],  # Replace with your trusted origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def create_thread(prompt):
     thread = client.beta.threads.create()
@@ -40,6 +50,13 @@ def create_thread(prompt):
 def check_status(run_id, thread_id):
     run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
     return run.status
+
+@app.get("/")
+def read_root():
+    """
+    Root endpoint for testing the API.
+    """
+    return {"message": "Welcome to the Image Classification API. Use /classify-image/ to classify images."}
 
 @app.post("/classify-image/")
 async def classify_image(image: UploadFile):
@@ -94,4 +111,3 @@ async def classify_image(image: UploadFile):
             raise HTTPException(status_code=500, detail="No response received from assistant.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
