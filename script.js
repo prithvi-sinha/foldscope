@@ -10,7 +10,11 @@ async function startCamera() {
         console.log("Requesting camera access...");
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
-        console.log("Camera access granted.");
+
+        // Wait for metadata to load
+        video.onloadedmetadata = () => {
+            console.log("Video feed ready:", video.videoWidth, "x", video.videoHeight);
+        };
     } catch (error) {
         console.error("Error accessing camera:", error);
         alert("Error accessing camera: " + error.message);
@@ -19,6 +23,13 @@ async function startCamera() {
 
 // Capture a frame from the video feed and classify it
 async function captureImage() {
+    // Wait until the video feed is ready
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+        console.log("Video feed not ready. Retrying...");
+        setTimeout(captureImage, 500); // Retry after 500ms
+        return;
+    }
+
     console.log("Capturing image...");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
@@ -26,8 +37,13 @@ async function captureImage() {
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert the canvas to a blob for upload
     canvas.toBlob(async (blob) => {
+        if (!blob) {
+            console.error("Failed to create Blob from canvas.");
+            alert("Failed to capture image. Please try again.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("image", blob, "capture.jpg");
 
@@ -72,4 +88,6 @@ document.getElementById("ar-btn").addEventListener("click", () => {
     alert("Point your camera at a Hiro marker to see AR overlays!");
 });
 
-// Initia
+// Initialize the camera and debug utilities
+startCamera();
+listDevices();
