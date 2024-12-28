@@ -11,19 +11,33 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
         }
 
         #controls {
-            padding: 10px;
-            text-align: center;
-            background-color: #f0f0f0;
-            border-bottom: 1px solid #ddd;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         button {
             padding: 10px 15px;
             font-size: 16px;
-            margin: 5px;
             cursor: pointer;
             background-color: #007bff;
             color: white;
@@ -35,28 +49,59 @@
             background-color: #0056b3;
         }
 
-        #result {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 18px;
-        }
-
-        video {
+        #camera-feed {
             width: 100%;
             height: auto;
             display: block;
+            margin-top: 70px;
+        }
+
+        #result {
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #result h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        #result p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        a-scene {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <header>
+        <h1>Foldscope AR Classification</h1>
+    </header>
+
     <!-- Controls Section -->
     <div id="controls">
-        <button id="capture-btn">Capture Image</button>
+        <button id="capture-btn">Capture and Classify</button>
         <button id="ar-btn">Toggle AR View</button>
     </div>
 
     <!-- Live Camera Feed -->
     <video id="camera-feed" autoplay playsinline></video>
+
+    <!-- Result Section -->
+    <div id="result">
+        <h3>Classification Result</h3>
+        <p id="output">No result yet. Please capture an image.</p>
+    </div>
 
     <!-- AR Scene -->
     <a-scene embedded arjs>
@@ -65,12 +110,6 @@
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
-
-    <!-- Result Section -->
-    <div id="result">
-        <h3>Classification Result:</h3>
-        <p id="output">No result yet.</p>
-    </div>
 
     <script>
         const API_URL = "https://foldscopeapi.onrender.com/classify-image/";
@@ -89,7 +128,7 @@
             }
         }
 
-        // Capture a frame from the video feed
+        // Capture a frame from the video feed and classify it
         async function captureImage() {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
@@ -117,7 +156,7 @@
                     output.textContent = data.classification;
                     arResult.setAttribute("value", data.classification);
                 } catch (error) {
-                    console.error(error);
+                    console.error("Error:", error);
                     output.textContent = `Error: ${error.message}`;
                 }
             }, "image/jpeg");
