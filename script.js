@@ -3,6 +3,8 @@ const videoElement = document.getElementById("camera-feed");
 const arVideoElement = document.getElementById("ar-video");
 const arResult = document.getElementById("ar-result");
 const devicesList = document.getElementById("devices-list");
+const startButton = document.getElementById("start-btn");
+
 
 // Access the user's camera
 async function startCamera() {
@@ -98,3 +100,5 @@ document.getElementById("ar-btn").addEventListener("click", () => {
 });
 startCamera();
 listDevices();
+// Add a click event listener to the button
+startButton.addEventListener("click", startCamera);
