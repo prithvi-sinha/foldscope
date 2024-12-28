@@ -4,83 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foldscope AR Classification</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js@2.0.1/aframe/build/aframe-ar.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #controls {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #camera-feed {
-            width: 100%;
-            height: auto;
-            display: block;
-            margin-top: 70px;
-        }
-
-        #result {
-            margin: 20px auto;
-            max-width: 600px;
-            padding: 20px;
-            text-align: center;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        #result h3 {
-            margin-bottom: 10px;
-            font-size: 20px;
-            color: #333;
-        }
-
-        #result p {
-            font-size: 16px;
-            color: #555;
-        }
-
-        a-scene {
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
     <!-- Header -->
@@ -111,67 +37,6 @@
         <a-entity camera></a-entity>
     </a-scene>
 
-    <script>
-        const API_URL = "https://foldscopeapi.onrender.com/classify-image/";
-
-        const video = document.getElementById('camera-feed');
-        const output = document.getElementById('output');
-        const arResult = document.getElementById('ar-result');
-
-        // Access the user's camera
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (error) {
-                console.error("Error accessing camera:", error);
-            }
-        }
-
-        // Capture a frame from the video feed and classify it
-        async function captureImage() {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert the canvas to a blob for upload
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append("image", blob, "capture.jpg");
-
-                try {
-                    output.textContent = "Processing...";
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        body: formData,
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`API Error: ${response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    output.textContent = data.classification;
-                    arResult.setAttribute("value", data.classification);
-                } catch (error) {
-                    console.error("Error:", error);
-                    output.textContent = `Error: ${error.message}`;
-                }
-            }, "image/jpeg");
-        }
-
-        // Toggle AR View
-        document.getElementById("ar-btn").addEventListener("click", () => {
-            alert("Point your camera at a Hiro marker to see AR overlays!");
-        });
-
-        // Capture Button Handler
-        document.getElementById("capture-btn").addEventListener("click", captureImage);
-
-        // Start the camera feed
-        startCamera();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
