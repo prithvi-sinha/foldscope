@@ -1,6 +1,6 @@
 const API_URL = "https://foldscopeapi.onrender.com/classify-image/";
-const video = document.getElementById("camera-feed");
-const output = document.getElementById("output");
+const videoElement = document.getElementById("camera-feed");
+const arVideoElement = document.getElementById("ar-video");
 const arResult = document.getElementById("ar-result");
 const devicesList = document.getElementById("devices-list");
 
@@ -8,12 +8,13 @@ const devicesList = document.getElementById("devices-list");
 async function startCamera() {
     try {
         console.log("Requesting camera access...");
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        videoElement.srcObject = stream;
 
-        // Wait for metadata to load
-        video.onloadedmetadata = () => {
-            console.log("Video feed ready:", video.videoWidth, "x", video.videoHeight);
+        videoElement.onloadedmetadata = () => {
+            console.log("Video feed is ready.");
+            // Assign the video element's src to the a-video element dynamically
+            arVideoElement.setAttribute("src", "#camera-feed");
         };
     } catch (error) {
         console.error("Error accessing camera:", error);
