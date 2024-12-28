@@ -1,3 +1,4 @@
 .env
+change-author.sh
 __pycache__/
 *.pyc
