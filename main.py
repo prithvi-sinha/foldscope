@@ -24,10 +24,13 @@ app = FastAPI(title="Image Classification API", version="1.0")
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "https://your-frontend-domain.com"],  # Replace with your trusted origins
+    allow_origins=[
+        "https://prithvi-sinha.github.io",  # GitHub Pages domain
+        "http://localhost:8000"            # Local development
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 def create_thread(prompt):
